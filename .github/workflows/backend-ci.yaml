@@ -1,66 +1,57 @@
 name: Backend Continuous Integration
 
 on:
- pull_request:
-  branches:
-  - main
- workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
- lint:
-  name: Backend Lint
-  runs-on: ubuntu-latest
-  dfaults:
-  run:
-  working-directory: starter/backend
-  steps:
-  -name: Checkout code
-  uses: actions/checkout@v4
-
-  -name: Setup Python
-  uses: actions/setup-python@v5
-   with:
-  python-version: "3.10"
-  cache: pip
-
-  -name: Install dependencies
-  run: pip install pipenv && pipenv install --dev
-
-  -name: Run lint
-  run: pipenv run flake8 .
+  lint:
+    name: Backend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install pipenv && pipenv run pip install flask==2.2.3 flask-cors==3.0.10 Werkzeug==2.2.3 pytest==7.2.1 flake8 black coverage
+      - name: Run lint
+        run: pipenv run flake8 .
 
   test:
-  name: Backend Tests
-  runs-on: ubuntu-latest
-  defaults:
-  run:
-  working-directory: starter/backend
-  steps:
-   - name: Checkout code
-  uses: actions/checkout@v4
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter/backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install pipenv && pipenv run pip install flask==2.2.3 flask-cors==3.0.10 Werkzeug==2.2.3 pytest==7.2.1 flake8 black coverage
+      - name: Run tests
+        run: pipenv run pytest
 
-  -name: Setup Python
-  uses: actions/setup-python@v5
-   with:
-   python-version: "3.10"
-  cache: pip
-
-  - name: Install dependencies
-  run: pip install pipenv && pipenv install --dev
-
-  - name: Run tests
-   run: pipenv run pytest
-
- build:
-  name: Backend Docker Build
-   runs-on: ubuntu-lastest
-  needs:
-  - lint
-  - test
-  steps:
-   - name: Checkout code
-  uses: actions/checkout@v4
-
-   - name: Build Docker image
-  working-directory: starter/backend
-  run: docker build --tag mp-backend:latest .
+  build:
+    name: Backend Docker Build
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        working-directory: starter/backend
+        run: docker build --tag mp-backend:latest .
